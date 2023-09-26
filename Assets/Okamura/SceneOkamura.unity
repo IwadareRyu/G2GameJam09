@@ -366,7 +366,7 @@ MonoBehaviour:
   _gravity: 0.2
   _vec2:
   - {x: 1, y: 0}
-  - {x: 2, y: 1}
+  - {x: 1, y: 1}
   - {x: 1, y: -1}
 --- !u!61 &842923385
 BoxCollider2D:
