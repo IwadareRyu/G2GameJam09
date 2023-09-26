@@ -45,13 +45,23 @@ public class CRIAudioManager : AbstractSingleton<CRIAudioManager>
     }
 
 
-    public void CribgmPlay(int index)
+    public void CriBgmPlay(int index)
     {
         _criAtomExPlaybackBGM = _criAtomSourceBgm.Play(index);
     }
 
-    public void CrisePlay(int index)
+    public void CriBgmStop()
+    {
+        _criAtomSourceBgm.Stop();
+    }
+
+    public void CriSePlay(int index)
     {
         _criAtomSourceSe.Play(index);
+    }
+
+    public void CriSeStop()
+    {
+        _criAtomSourceSe.Stop();
     }
 }
