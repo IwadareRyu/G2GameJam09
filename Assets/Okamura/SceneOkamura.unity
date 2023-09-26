@@ -362,7 +362,8 @@ MonoBehaviour:
   _enemyScoreB: 500
   _enemyScoreC: 1000
   _waitDestroy: 1
-  _impactedSpeed: 10
+  _impactedSpeed: 5
+  _gravity: 0.2
   _vec2:
   - {x: 1, y: 0}
   - {x: 2, y: 1}
@@ -429,7 +430,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0
-  m_GravityScale: 0.1
+  m_GravityScale: 0
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
@@ -671,7 +672,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 40
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2

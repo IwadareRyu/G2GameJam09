@@ -13,6 +13,8 @@ public class Enemy : MonoBehaviour
     [SerializeField] float _waitDestroy = 1;
     [Tooltip("エネミーの吹っ飛ぶ速度")]
     [SerializeField] float _impactedSpeed = 3;
+    [Tooltip("エネミーの落下速度")]
+    [SerializeField] float _gravity = 0.2f;
     [Tooltip("エネミーの吹っ飛び方")]
     [SerializeField] Vector2[] _vec2 = new[] { new Vector2(1, 0), new Vector2(1, 1), new Vector2(1, -1)};
     /// <summary>
@@ -25,6 +27,7 @@ public class Enemy : MonoBehaviour
         _anim = GetComponent<Animator>();
         _rb = GetComponent<Rigidbody2D>();
     }
+
     private int GetScore()
     {
         if(_state == EnemyState.EnemyA)
@@ -65,7 +68,9 @@ public class Enemy : MonoBehaviour
     {
         int score = GetScore();
         _anim.SetBool("Defeat", true);
-        _rb.AddForce(_vec2[GetState()].normalized * _impactedSpeed,ForceMode2D.Impulse);
+        _rb.velocity = (_vec2[GetState()].normalized * _impactedSpeed);
+        //_rb.AddForce(_vec2[GetState()].normalized * _impactedSpeed,ForceMode2D.Impulse);
+        _rb.gravityScale = _gravity;
         GameManager.Instance.ScoreValue(score);
         //ここからanimatorの処理を描く
         yield return new WaitForSeconds(_waitDestroy);
