@@ -8,6 +8,7 @@ using Unity.VisualScripting;
 
 public enum GameState
 {
+    None = 0,
     Start,
     InGame,
     Result,
@@ -16,44 +17,46 @@ public enum GameState
 public class GameManager : AbstractSingleton<GameManager>
 {
     [Tooltip("現在のゲームステート")]
-    [SerializeField] static public GameState NowGameState = GameState.InGame;
+    [SerializeField] private GameState NowGameState = GameState.None;
     [Tooltip("ゲーム内のスコア")]
-    [SerializeField] private static int _score = 0;
-    [Tooltip("InGame スコア表示用のテキストＵＩ")]
-    [SerializeField] private GameObject _scoreTextUI;
-    [Tooltip("InGame 操作説明用のpanel")]
-    [SerializeField] private GameObject _tutorialPanelUI;
-    [Tooltip("InGame 制限時間表示用のテキストUI")]
-    [SerializeField] private GameObject _timeTextUI;
-    [Tooltip("Rexult スコアを表示するテキストUI")]
-    [SerializeField] private GameObject _resultScoreTextUI;
+    [SerializeField] private int _score = 0;
     [Tooltip("ゲーム開始判定（ゲーム中の時はTrue）")]
     public bool is_Game = false;
     [Tooltip("ゲームクリア判定（クリア時にTrue）")]
     public bool is_Clear = false;
     [Tooltip("制限時間")]
     [SerializeField] private float _time = 180;
+    [Tooltip("実際の計算に用いるタイマー変数")]
+    private float _timeValue;
     [Tooltip("制限時間を入れるText")]
-    private Text _timeText;
+    [SerializeField] private Text _timeText;
     [Tooltip("スコアを入れるText")]
-    private Text _scoreText;
+    [SerializeField] private Text _scoreText;
     [Tooltip("リザルト時にスコアをいれるText")]
-    private Text _resultScoreText;
+    [SerializeField] private Text _resultScoreText;
 
-    private void Start()
+    public void LoadProssesing()
     {
+        Debug.Log("遷移");
+        Debug.Log($"Start処理 {NowGameState}");
         switch (NowGameState)
         {
             case GameState.Start:
+                //スコア初期化処理
                 _score = 0;
-                _timeText = _timeTextUI.GetComponent<Text>();
-                _scoreText = _scoreTextUI.GetComponent<Text>();
-                _tutorialPanelUI.SetActive(true);
+                //タイマーの初期化
+                _timeValue = _time;
+                //Textの初期化
+                _timeText.text = _time.ToString("000");
+                _scoreText.text = _score.ToString("00000");
                 break;
 
             case GameState.Result:
-                _resultScoreText = _resultScoreTextUI.GetComponent<Text>();
+                //Debug.Log(NowGameState);
                 _resultScoreText.text = _score.ToString("00000");
+                is_Game = false;
+                is_Clear = false;
+                //Debug.Log("result");
                 break;
         }
     }
@@ -62,16 +65,26 @@ public class GameManager : AbstractSingleton<GameManager>
     {
         switch (NowGameState)
         {
-            case GameState.InGame:
-                if (is_Game)
-                {
-                    _time -= Time.deltaTime;
-                    _timeText.text = _time.ToString("000");
-                }
-
+            case GameState.Start:
                 if (!is_Game && Input.GetKeyDown(KeyCode.Space))
-                {
+                {//スペースキーが押されたらゲームスタート
                     is_Game = true;
+                    NowGameState = GameState.InGame;
+                }
+                break;
+
+            case GameState.InGame:
+                if (!is_Game)
+                {
+                    return;
+                }
+                else
+                {//ゲームが開始された時の処理
+                    if (_timeText != null)
+                    {
+                        _timeValue -= Time.deltaTime;
+                        _timeText.text = _timeValue.ToString("000");
+                    }
                 }
                 break;
         }
@@ -79,15 +92,28 @@ public class GameManager : AbstractSingleton<GameManager>
 
     public void ScoreValue (int value)
     {
+        //スコアを変動させ、テキストを更新
         _score += value;
         _scoreText.text = _score.ToString("000000");
     }
 
     public void SceneChange(string scene)
-    {
-        if (scene == "InGame") { NowGameState = GameState.Start; }
-        else if (scene == "Result") { NowGameState = GameState.Result; }
+    {//シーン遷移処理
+        //遷移先のシーンに合わせてステートを変更
+        if (scene == "InGame") 
+        {
+            NowGameState = GameState.Start; 
+        }
+        else if (scene == "Result")
+        {
+            NowGameState = GameState.Result;
+            is_Game = false;
+            is_Clear = false;
+            Debug.Log(is_Game);
+        }
 
+        Debug.Log(NowGameState);
         SceneManager.LoadScene(scene);
+        LoadProssesing();
     }
 }
