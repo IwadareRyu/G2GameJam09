@@ -16,15 +16,17 @@ public enum GameState
 public class GameManager : AbstractSingleton<GameManager>
 {
     [Tooltip("現在のゲームステート")]
-    [SerializeField] static public GameState GameState = GameState.InGame;
+    [SerializeField] static public GameState NowGameState = GameState.InGame;
     [Tooltip("ゲーム内のスコア")]
     [SerializeField] private static int _score = 0;
-    [Tooltip("スコア表示用のテキストＵＩ")]
+    [Tooltip("InGame スコア表示用のテキストＵＩ")]
     [SerializeField] private GameObject _scoreTextUI;
-    [Tooltip("操作説明用のpanel")]
+    [Tooltip("InGame 操作説明用のpanel")]
     [SerializeField] private GameObject _tutorialPanelUI;
-    [Tooltip("制限時間表示用のテキストUI")]
+    [Tooltip("InGame 制限時間表示用のテキストUI")]
     [SerializeField] private GameObject _timeTextUI;
+    [Tooltip("Rexult スコアを表示するテキストUI")]
+    [SerializeField] private GameObject _resultScoreTextUI;
     [Tooltip("ゲーム開始判定（ゲーム中の時はTrue）")]
     public bool is_Game = false;
     [Tooltip("ゲームクリア判定（クリア時にTrue）")]
@@ -35,26 +37,42 @@ public class GameManager : AbstractSingleton<GameManager>
     private Text _timeText;
     [Tooltip("スコアを入れるText")]
     private Text _scoreText;
+    [Tooltip("リザルト時にスコアをいれるText")]
+    private Text _resultScoreText;
 
     private void Start()
     {
-        switch (GameState)
+        switch (NowGameState)
         {
-            case GameState.InGame:
+            case GameState.Start:
+                _score = 0;
                 _timeText = _timeTextUI.GetComponent<Text>();
                 _scoreText = _scoreTextUI.GetComponent<Text>();
                 _tutorialPanelUI.SetActive(true);
+                break;
+
+            case GameState.Result:
+                _resultScoreText = _resultScoreTextUI.GetComponent<Text>();
+                _resultScoreText.text = _score.ToString("00000");
                 break;
         }
     }
 
     private void Update()
     {
-        switch (GameState)
+        switch (NowGameState)
         {
             case GameState.InGame:
-                _time -= Time.deltaTime;
-                _timeText.text = _time.ToString("000");
+                if (is_Game)
+                {
+                    _time -= Time.deltaTime;
+                    _timeText.text = _time.ToString("000");
+                }
+
+                if (!is_Game && Input.GetKeyDown(KeyCode.Space))
+                {
+                    is_Game = true;
+                }
                 break;
         }
     }
@@ -63,5 +81,13 @@ public class GameManager : AbstractSingleton<GameManager>
     {
         _score += value;
         _scoreText.text = _score.ToString("000000");
+    }
+
+    public void SceneChange(string scene)
+    {
+        if (scene == "InGame") { NowGameState = GameState.Start; }
+        else if (scene == "Result") { NowGameState = GameState.Result; }
+
+        SceneManager.LoadScene(scene);
     }
 }
