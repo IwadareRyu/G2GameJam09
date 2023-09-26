@@ -18,6 +18,8 @@ public class GameManager : AbstractSingleton<GameManager>
 {
     [Tooltip("現在のゲームステート")]
     [SerializeField] private GameState NowGameState = GameState.None;
+    [Tooltip("InGameから遷移するシーンの名前を設定")]
+    [SerializeField] private string _sceneName = null;
     [Tooltip("ゲーム内のスコア")]
     [SerializeField] private int _score = 0;
     [Tooltip("ゲーム開始判定（ゲーム中の時はTrue）")]
@@ -37,8 +39,6 @@ public class GameManager : AbstractSingleton<GameManager>
 
     public void LoadProssesing()
     {
-        Debug.Log("遷移");
-        Debug.Log($"Start処理 {NowGameState}");
         switch (NowGameState)
         {
             case GameState.Start:
@@ -97,6 +97,16 @@ public class GameManager : AbstractSingleton<GameManager>
         _scoreText.text = _score.ToString("000000");
     }
 
+    public void ClearCalculaton()
+    {
+        is_Clear = true;
+        is_Game = false;
+        _score += (int)_timeValue * 10;
+
+        if (_sceneName != null) { SceneChange(_sceneName); }
+        else { SceneChange("Result"); }
+    }
+
     public void SceneChange(string scene)
     {//シーン遷移処理
         //遷移先のシーンに合わせてステートを変更
@@ -109,10 +119,8 @@ public class GameManager : AbstractSingleton<GameManager>
             NowGameState = GameState.Result;
             is_Game = false;
             is_Clear = false;
-            Debug.Log(is_Game);
         }
 
-        Debug.Log(NowGameState);
         SceneManager.LoadScene(scene);
         LoadProssesing();
     }
