@@ -6,9 +6,11 @@ using UnityEngine.UI;
 
 public class ButtonStter : MonoBehaviour
 {
+    [Tooltip("ëJà⁄ÇµÇΩÇ¢ÉVÅ[Éìñº")]
+    [SerializeField] private string _sceneName = null;
     // Start is called before the first frame update
     void Start()
     {
-        GetComponent<Button>().onClick.AddListener(() => GameManager.Instance.SceneChange("InGame"));
+        GetComponent<Button>().onClick.AddListener(() => GameManager.Instance.SceneChange(_sceneName));
     }
 }
