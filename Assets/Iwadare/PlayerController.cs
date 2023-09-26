@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEditor.Callbacks;
 using UnityEngine;
+using UnityEngine.UI;
+
 
 public class PlayerController : MonoBehaviour
 {
@@ -30,13 +32,15 @@ public class PlayerController : MonoBehaviour
 
     private bool _attackbool;
 
+    private bool _jump;
+
     RaycastHit2D _groundHit;
     [SerializeField]
     LayerMask _groundLayer;
 
-    RaycastHit2D _upGroundHit;
-    [SerializeField]
-    LayerMask _upGroundLayer;
+    //RaycastHit2D _upGroundHit;
+    //[SerializeField]
+    //LayerMask _upGroundLayer;
 
     [Header("ジャンプ時、向きを元に戻すので、Playerのスプライトをアタッチ")]
     [SerializeField]
@@ -45,6 +49,12 @@ public class PlayerController : MonoBehaviour
     [Header("敵に当たった時減らすスコア")]
     [SerializeField]
     int _lowScore = -2000;
+
+    [Header("スピードを表示するテキスト(かなり盛ってる)")]
+    [SerializeField]
+    Text _speedText;
+
+    float _speedTimer;
 
     // Start is called before the first frame update
     void Start()
@@ -56,90 +66,120 @@ public class PlayerController : MonoBehaviour
     private void OnDrawGizmos()
     {
         Debug.DrawRay(transform.position, new Vector2(0, -3), Color.red);
-        Debug.DrawRay(new Vector3(transform.position.x + 1,transform.position.y - 0.5f,transform.position.z),new Vector2(0,1),Color.red);
-        Debug.DrawRay(new Vector3(transform.position.x + 0.5f, transform.position.y, transform.position.z), new Vector2(1,0), Color.red);
+        Debug.DrawRay(new Vector3(transform.position.x + 1,transform.position.y - 0.8f,transform.position.z),new Vector2(0,1),Color.red);
+        Debug.DrawRay(new Vector3(transform.position.x + 0.5f, transform.position.y - 0.3f, transform.position.z), new Vector2(1,0), Color.red);
     }
 
     // Update is called once per frame
     void Update()
     {
-        _groundHit = Physics2D.Raycast(transform.position, Vector2.down, 3.0f, _groundLayer);
-        _upGroundHit = Physics2D.Raycast(transform.position, Vector2.down, 3.0f, _upGroundLayer);
+        //if (GameManager.Instance.is_Game)
+        //{
+            _groundHit = Physics2D.Raycast(transform.position, Vector2.down, 3.0f, _groundLayer);
+            //_upGroundHit = Physics2D.Raycast(transform.position, Vector2.down, 3.0f, _upGroundLayer);
 
-        float h = Input.GetAxis("Horizontal");
-        if (_attackbool)
-            _attackTime += Time.deltaTime;
+            float h = Input.GetAxis("Horizontal");
+            if (_attackbool)
+            {
+                _attackTime += Time.deltaTime;
+            }
+            _speedTimer += Time.deltaTime;
 
-        if (h > 0)
-        {
-            if (_speed < _maxSpeed)
+            if (h > 0)
             {
-                PlayerSpeed(0.01f);
+                if (_speed < _maxSpeed)
+                {
+                    PlayerSpeed(0.01f);
+                }
             }
-        }
-        if (h < 0)
-        {
-            if (_speed > _minSpeed)
+            if (h < 0)
             {
-                PlayerSpeed(-0.01f);
+                if (_speed > _minSpeed)
+                {
+                    PlayerSpeed(-0.01f);
+                }
             }
-        }
 
-        if (_attackTime > 0.3f)
-        {
-            _attackbool = false;
+            if (_attackTime > 0.3f)
+            {
+                _attackbool = false;
 
-            //ピロンみたいな音を出すかも？
+                //ピロンみたいな音を出すかも？
 
-            _attackTime = 0;
-        }
-        if (!_attackbool)
-        {
-            if (Input.GetButtonDown("Fire1"))
-            {
-                AttackMotion(EnemyState.EnemyA);
+                _attackTime = 0;
             }
-            else if (Input.GetButtonDown("Fire2"))
+
+            if (!_attackbool)
             {
-                AttackMotion(EnemyState.EnemyB);
+                if (Input.GetButtonDown("Fire1"))
+                {
+                    AttackMotion(EnemyState.EnemyA);
+                }
+                else if (Input.GetButtonDown("Fire2"))
+                {
+                    AttackMotion(EnemyState.EnemyB);
+                }
+                else if (Input.GetButtonDown("Fire3"))
+                {
+                    AttackMotion(EnemyState.EnemyC);
+                }
             }
-            else if (Input.GetButtonDown("Fire3"))
+
+
+
+            if (_speedTimer > 1f)
             {
-                AttackMotion(EnemyState.EnemyC);
+                int score = 0;
+                if (_speed >= _maxSpeed - 0.1f)
+                {
+                    score = 300;
+                    //強風
+                }
+                else if (_speed > _midSpeed)
+                {
+                    score = 200;
+                    //弱風
+                }
+                else
+                {
+                    //なし
+                }
+                if (GameManager.Instance)
+                {
+                    GameManager.Instance.ScoreValue(score);
+                }
             }
-        }
+        //}
     }
 
     private void FixedUpdate()
     {
         float n = 0f;
 
+
         if(_groundHit.collider)
         {
             n = -_speed * _plusGravity;
         }
-        if(_upGroundHit.collider)
-        {
-            n = -_speed * 0.1f;
-        }
+
+        //if(_upGroundHit.collider)
+        //{
+        //    n = -_speed * 0.2f;
+        //}
+
+
         _rb.velocity = new Vector2(_speed, _rb.velocity.y + n);
+
+        if (_speedText)
+        {
+            var total = (Mathf.Abs(_rb.velocity.x) + Mathf.Abs(_rb.velocity.y)) * 8;
+            _speedText.text = $"Speed: {total.ToString("0.00")} km";
+        }
     }
 
     void PlayerSpeed(float num)
     {
         _speed += num;
-        if (_speed >= _maxSpeed - 0.1f)
-        {
-            //強風
-        }
-        else if (_speed > _midSpeed)
-        {
-            //弱風
-        }
-        else
-        {
-            //なし
-        }
     }
 
     void AttackMotion(EnemyState state)
@@ -148,7 +188,7 @@ public class PlayerController : MonoBehaviour
         //stateに合わせたアタックモーション
 
         Collider2D[] cols;
-        cols = Physics2D.OverlapCircleAll(new Vector2(transform.position.x + 1,transform.position.y),1.0f);
+        cols = Physics2D.OverlapCircleAll(new Vector2(transform.position.x + 1,transform.position.y - 0.3f),1.0f);
 
         foreach(var col in cols)
         {
@@ -172,7 +212,11 @@ public class PlayerController : MonoBehaviour
         if(collision.gameObject.tag == "Enemy")
         {
             _speed = 0.5f;
-            GameManager.Instance.ScoreValue(_lowScore);
+            CRIAudioManager.Instance.CriSePlay(0);
+            if (GameManager.Instance)
+            {
+                GameManager.Instance.ScoreValue(_lowScore);
+            }
 
         }
     }
