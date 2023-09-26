@@ -1,9 +1,7 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine;
-using UnityEngine.UI;
 
+[RequireComponent(typeof(Animator))]
 public class Enemy : MonoBehaviour
 {
     [SerializeField] public EnemyState _state;
@@ -12,7 +10,14 @@ public class Enemy : MonoBehaviour
     [SerializeField] int _enemyScoreC = 1000;
     [Tooltip("EnemyのDestroyされるまでの時間")]
     [SerializeField] float _waitDestroy = 1;
-    
+    /// <summary>
+    /// エネミーにつけるAnimatorのパラメーターにはbool値"Defeat"をfalseで追加してください
+    /// </summary>
+    Animator _anim;
+    private void Start()
+    {
+        _anim = GetComponent<Animator>();
+    }
     private int GetScore()
     {
         if(_state == EnemyState.EnemyA)
@@ -40,6 +45,7 @@ public class Enemy : MonoBehaviour
         GameManager.Instance.ScoreValue(score);
         yield return new WaitForSeconds(_waitDestroy);
         //ここからanimatorの処理を描く
+        _anim.SetBool("Defeat", true);
         Destroy(this);
     }
 }
