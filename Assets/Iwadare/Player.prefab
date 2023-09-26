@@ -264,8 +264,9 @@ MonoBehaviour:
   _upGroundLayer:
     serializedVersion: 2
     m_Bits: 64
-  _sproteAngle: {fileID: 0}
+  _sproteAngle: {fileID: 5368975016492408899}
   _lowScore: -2000
+  _speedText: {fileID: 0}
 --- !u!114 &8686228303227924012
 MonoBehaviour:
   m_ObjectHideFlags: 0
