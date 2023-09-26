@@ -1,6 +1,8 @@
 using System.Collections;
 using System.ComponentModel;
 using UnityEngine;
+using DG.Tweening;
+
 
 [RequireComponent(typeof(Animator))]
 public class Enemy : MonoBehaviour
@@ -9,22 +11,29 @@ public class Enemy : MonoBehaviour
     [SerializeField] int _enemyScoreA = 500;
     [SerializeField] int _enemyScoreB = 500;
     [SerializeField] int _enemyScoreC = 1000;
-    [Tooltip("EnemyのDestroyされるまでの時間")]
+    [Tooltip("EnemyのDestroyされるまでの時間(s)")]
     [SerializeField] float _waitDestroy = 1;
     [Tooltip("エネミーの吹っ飛ぶ速度")]
     [SerializeField] float _impactedSpeed = 3;
-    [Tooltip("エネミーの吹っ飛び方")]
+    [Tooltip("エネミーの落下速度")]
+    [SerializeField] float _gravity = 0.2f;
+    [Tooltip("エネミーの1回転にかかる時間(s)")]
+    [SerializeField] float _rotateTime = 0.2f;
+    [Tooltip("エネミーの吹っ飛び方(Vector2)")]
     [SerializeField] Vector2[] _vec2 = new[] { new Vector2(1, 0), new Vector2(1, 1), new Vector2(1, -1)};
     /// <summary>
     /// エネミーにつけるAnimatorのパラメーターにはbool値"Defeat"をfalseで追加してください
     /// </summary>
+    Transform _tra;
     Rigidbody2D _rb;
     Animator _anim;
     private void Start()
     {
         _anim = GetComponent<Animator>();
         _rb = GetComponent<Rigidbody2D>();
+        _tra = GetComponent<Transform>();
     }
+
     private int GetScore()
     {
         if(_state == EnemyState.EnemyA)
@@ -64,10 +73,12 @@ public class Enemy : MonoBehaviour
     private IEnumerator IDefeated()
     {
         int score = GetScore();
-        _anim.SetBool("Defeat", true);
-        _rb.AddForce(_vec2[GetState()].normalized * _impactedSpeed,ForceMode2D.Impulse);
-        GameManager.Instance.ScoreValue(score);
         //ここからanimatorの処理を描く
+        _anim.SetBool("Defeat", true);
+        _tra.DORotate(new Vector3(0, 0, 360), _rotateTime, RotateMode.FastBeyond360).SetEase(Ease.Linear).SetLoops(-1);
+        _rb.velocity = (_vec2[GetState()].normalized * _impactedSpeed);
+        _rb.gravityScale = _gravity;
+        GameManager.Instance.ScoreValue(score);
         yield return new WaitForSeconds(_waitDestroy);
         Destroy(this);
     }
