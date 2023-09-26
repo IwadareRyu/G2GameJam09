@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour
 {
-    [SerializeField] EnemyState _state;
+    [SerializeField] public EnemyState _state;
     [SerializeField] int _enemyScoreA = 500;
     [SerializeField] int _enemyScoreB = 500;
     [SerializeField] int _enemyScoreC = 1000;
