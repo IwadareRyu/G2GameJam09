@@ -39,7 +39,7 @@ public class Enemy : MonoBehaviour
         int score = GetScore();
         GameManager.Instance.ScoreValue(score);
         yield return new WaitForSeconds(_waitDestroy);
-
+        //‚±‚±‚©‚çanimator‚Ìˆ—‚ğ•`‚­
         Destroy(this);
     }
 }
