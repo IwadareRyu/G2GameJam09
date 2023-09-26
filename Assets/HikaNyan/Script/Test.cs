@@ -7,6 +7,6 @@ public class Test : MonoBehaviour
 {
     private void Start()
     {
-        CRIAudioManager.Instance.CribgmPlay(206);
+        CRIAudioManager.Instance.CriSePlay(0);
     }
 }
