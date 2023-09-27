@@ -58,6 +58,8 @@ public class GameManager : AbstractSingleton<GameManager>
                 _timeText.enabled = true;
                 _scoreText.enabled = true;
                 _holdCT = _lightCT;
+                //Audiの再生
+                CRIAudioManager.Instance.CriBgmPlay(0);
                 //スコア初期化処理
                 _score = 0;
                 //タイマーの初期化
@@ -75,6 +77,8 @@ public class GameManager : AbstractSingleton<GameManager>
                 //ライトの明るさを戻す
                 _light.intensity = 1;
                 _resultScoreText.text = _score.ToString("00000");
+                //Audiの再生
+                CRIAudioManager.Instance.CriBgmPlay(1);
                 is_Game = false;
                 is_Clear = false;
                 break;
