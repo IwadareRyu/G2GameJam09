@@ -43,10 +43,39 @@ public class CRIAudioManager : AbstractSingleton<CRIAudioManager>
         _criAtomSourceSe.cueSheet = _cueSheetSe;
     }
 
+    float lastResumeBgmTime = 0;
+
+    // Update is called once per frame.
+    void Update()
+    {
+        if (lastResumeBgmTime + 2 < Time.timeSinceLevelLoad)
+        {
+            ResumeBGM();
+            lastResumeBgmTime = Time.timeSinceLevelLoad;
+        }
+    }
+
+    private int _indexStay = 0;
+
+    public void ResumeBGM()
+    {
+        /* Play if the status is in the PlayEnd or the Stop. (automatically restart when ACB is updated) */
+        CriAtomSource.Status status = _criAtomSourceBgm.status;
+        if ((status == CriAtomSource.Status.Stop) || (status == CriAtomSource.Status.PlayEnd))
+        {
+            CriBgmPlay(_indexStay);
+        }
+    }
 
     public void CriBgmPlay(int index)
     {
+        if (_criAtomSourceBgm.status == CriAtomSource.Status.Playing)
+        {
+            _criAtomSourceBgm.Stop();
+        }
+
         _criAtomExPlaybackBGM = _criAtomSourceBgm.Play(index);
+        _indexStay = index;
     }
 
     public void CriBgmStop()
