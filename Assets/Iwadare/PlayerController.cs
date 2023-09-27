@@ -12,6 +12,18 @@ public class PlayerController : MonoBehaviour
     Rigidbody2D _rb;
     CircleCollider2D _circleColider;
 
+    [SerializeField]
+    GameObject _wind;
+
+    [SerializeField]
+    GameObject _locus;
+
+
+    [SerializeField]
+    Sprite _playerSprite;
+
+    Animator _animator;
+
     int _rotaCount;
 
     [Header("最低スピード")]
@@ -19,6 +31,7 @@ public class PlayerController : MonoBehaviour
     private float _minSpeed = 0.5f;
 
     [Tooltip("現在のスピード")]
+    [SerializeField]
     private float _speed;
 
     [Header("最高スピード")]
@@ -26,8 +39,7 @@ public class PlayerController : MonoBehaviour
     private float _maxSpeed = 5f;
     [Header("中間のスピード")]
     [SerializeField]
-    private float _midSpeed = 2.5f
-        ;
+    private float _midSpeed = 2.5f;
     [SerializeField]
     private float _jumpPower = 3f;
     [Header("スピードに応じたプラスする重力の割合")]
@@ -73,6 +85,9 @@ public class PlayerController : MonoBehaviour
         _rb = GetComponent<Rigidbody2D>();
         _circleColider = GetComponent<CircleCollider2D>();
         _speed = _minSpeed;
+        _animator = GetComponent<Animator>();
+        _wind.SetActive(false);
+        _locus.SetActive(false);
     }
 
     private void OnDrawGizmos()
@@ -85,84 +100,112 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (GameManager.Instance.is_Game)
+        //if (GameManager.Instance.is_Game)
+        //{
+        _groundHit = Physics2D.Raycast(transform.position, Vector2.down, 2.0f, _groundLayer);
+        //_upGroundHit = Physics2D.Raycast(transform.position, Vector2.down, 3.0f, _upGroundLayer);
+
+        float h = Input.GetAxis("Horizontal");
+        if (_attackBool)
         {
-            _groundHit = Physics2D.Raycast(transform.position, Vector2.down, 2.0f, _groundLayer);
-            //_upGroundHit = Physics2D.Raycast(transform.position, Vector2.down, 3.0f, _upGroundLayer);
+            _attackTime += Time.deltaTime;
+        }
+        _speedTimer += Time.deltaTime;
 
-            float h = Input.GetAxis("Horizontal");
-            if (_attackBool)
+        if (h > 0)
+        {
+            if (_speed < _maxSpeed)
             {
-                _attackTime += Time.deltaTime;
-            }
-            _speedTimer += Time.deltaTime;
-
-            if (h > 0)
-            {
-                if (_speed < _maxSpeed)
-                {
-                    PlayerSpeed(0.01f);
-                }
-            }
-            if (h < 0)
-            {
-                if (_speed > _minSpeed)
-                {
-                    PlayerSpeed(-0.01f);
-                }
-            }
-
-            if (_attackTime > 0.3f)
-            {
-                _attackBool = false;
-
-                //ピロンみたいな音を出すかも？
-
-                _attackTime = 0;
-            }
-
-            if (!_attackBool)
-            {
-                if (Input.GetButtonDown("Fire1"))
-                {
-                    AttackMotion(EnemyState.EnemyA);
-
-                }
-                else if (Input.GetButtonDown("Fire2"))
-                {
-                    AttackMotion(EnemyState.EnemyB);
-                }
-                else if (Input.GetButtonDown("Fire3"))
-                {
-                    AttackMotion(EnemyState.EnemyC);
-                }
-            }
-
-
-
-            if (_speedTimer > 1f)
-            {
-                int score = 0;
-                if (_speed >= _maxSpeed - 0.1f)
-                {
-                    score = 300;
-                    //強風
-                }
-                else if (_speed > _midSpeed)
-                {
-                    score = 200;
-                    //弱風
-                }
-                else
-                {
-                    //なし
-                }
-                if (GameManager.Instance)
-                {
-                    GameManager.Instance.ScoreValue(score);
-                }
+                PlayerSpeed(0.01f);
             }
         }
+        if (h < 0)
+        {
+            if (_speed > _minSpeed)
+            {
+                PlayerSpeed(-0.01f);
+            }
+        }
+
+        if (_attackTime > 0.3f)
+        {
+            _attackBool = false;
+
+            //ピロンみたいな音を出すかも？
+
+            _attackTime = 0;
+        }
+
+        if (!_attackBool)
+        {
+            if (Input.GetButtonDown("Fire1"))
+            {
+                AttackMotion(EnemyState.EnemyA);
+                CRIAudioManager.Instance.CriSePlay(3);
+                _animator.Play("Attack1");
+            }
+            else if (Input.GetButtonDown("Fire2"))
+            {
+                AttackMotion(EnemyState.EnemyB);
+                CRIAudioManager.Instance.CriSePlay(3);
+                _animator.Play("Attack2");
+            }
+            else if (Input.GetButtonDown("Fire3"))
+            {
+                AttackMotion(EnemyState.EnemyC);
+                CRIAudioManager.Instance.CriSePlay(3);
+                _animator.Play("Attack3");
+            }
+        }
+
+
+
+        if (_speedTimer > 1f)
+        {
+            int score = 0;
+            if (_speed >= _maxSpeed - 0.1f)
+            {
+                score = 300;
+                //強風
+                if(_wind.active == false)
+                {
+                    _wind.SetActive(true);
+                }
+                if(_locus.active == false)
+                {
+                    _locus.SetActive(true);
+                }
+            }
+            else if (_speed > _midSpeed)
+            {
+                score = 200;
+                //弱風
+                if (_locus.active == false)
+                {
+                    _locus.SetActive(true);
+                }
+                if(_wind.active == true)
+                {
+                    _wind.SetActive(false);
+                }
+            }
+            else
+            {
+                if(_locus.active == true)
+                {
+                    _locus.SetActive(false);
+                }
+                if(_wind.active == true)
+                {
+                    _wind.SetActive(false);
+                }
+            }
+            if (GameManager.Instance)
+            {
+                GameManager.Instance.ScoreValue(score);
+            }
+        }
+        //}
     }
 
     private void FixedUpdate()
@@ -183,33 +226,35 @@ public class PlayerController : MonoBehaviour
 
         _rb.velocity = new Vector2(_speed, _rb.velocity.y + n);
 
-        if (Input.GetButton("Jump") && _jumpBool)
-        {
-            _actionBool = true;
-            _rb.velocity = new Vector2(_speed,_jumpPower);
-            CRIAudioManager.Instance.CriSePlay(2);
-            _jumpBool = false;
-        }
+        //if (Input.GetButton("Jump") && _jumpBool)
+        //{
+        //    _actionBool = true;
+        //    _rb.velocity = new Vector2(_speed,_jumpPower);
+        //    CRIAudioManager.Instance.CriSePlay(2);
+        //    _jumpBool = false;
+        //}
 
-        if (Input.GetButtonUp("Jump") && _actionBool)
-        {
-            n = 0;
+        //if (Input.GetButtonUp("Jump") && _actionBool)
+        //{
+        //    n = 0;
 
-            _spriteAngle.Rotate(0, 0, 45);
-            _rotaCount++;
+        //    _spriteAngle.Rotate(0, 0, 45);
+        //    _rotaCount++;
 
-            if (_rotaCount == 8)
-            {
-                _rotaCount = 0;
-                GameManager.Instance.ScoreValue(1000);
-            }
-        }
+        //    if (_rotaCount == 8)
+        //    {
+        //        _rotaCount = 0;
+        //        GameManager.Instance.ScoreValue(1000);
+        //    }
+        //}
 
         if (_speedText)
         {
             var total = (Mathf.Abs(_rb.velocity.x) + Mathf.Abs(_rb.velocity.y)) * 8;
             _speedText.text = $"Speed: {total.ToString("0.00")} km";
         }
+
+        _animator.SetFloat("Speed",_speed);
     }
 
     void PlayerSpeed(float num)
