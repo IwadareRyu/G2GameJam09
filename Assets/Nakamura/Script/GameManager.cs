@@ -53,7 +53,7 @@ public class GameManager : AbstractSingleton<GameManager>
             case GameState.Start:
                 if (_light == null)
                 {//Light‚ğ‚Á‚Ä‚¢‚È‚¢ê‡‚Éæ‚Á‚Ä‚­‚é
-                    _light = GetComponentInChildren<Light2D>();
+                   //_light = GetComponentInChildren<Light2D>();
                 }
                 //_timeText.enabled = true;
                 //_scoreText.enabled = true;
@@ -72,10 +72,10 @@ public class GameManager : AbstractSingleton<GameManager>
             case GameState.Result:
                 if (_light == null)
                 {//Light‚ğ‚Á‚Ä‚¢‚È‚¢ê‡‚Éæ‚Á‚Ä‚­‚é
-                    _light = GetComponentInChildren<Light2D>();
+                  //  _light = GetComponentInChildren<Light2D>();
                 }
                 //ƒ‰ƒCƒg‚Ì–¾‚é‚³‚ğ–ß‚·
-                _light.intensity = 1;
+                //_light.intensity = 1;
                 _resultScoreText.text = _score.ToString("00000");
                 //Audi‚ÌÄ¶
                 CRIAudioManager.Instance.CriBgmPlay(1);
