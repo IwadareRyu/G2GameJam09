@@ -45,6 +45,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   NowGameState: 3
+  _InGameTOresult: Result
+  _resultTOinGame: InGame
   _score: 0
   is_Game: 0
   is_Clear: 0
@@ -52,3 +54,5 @@ MonoBehaviour:
   _timeText: {fileID: 1788552580330344906, guid: a3390774094b26b4d8661a6a39063a13, type: 3}
   _scoreText: {fileID: 1474405024408062308, guid: c83d86dbfae08fb42980e56e091bdcf5, type: 3}
   _resultScoreText: {fileID: 3079410517936601761, guid: 1ad3cc9e82ddb784586e6ed774177779, type: 3}
+  _lightCT: 3
+  _douwLight: 0.01
