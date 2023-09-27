@@ -1,8 +1,6 @@
 using System.Collections;
-using System.ComponentModel;
 using UnityEngine;
 using DG.Tweening;
-
 
 [RequireComponent(typeof(Animator))]
 public class Enemy : MonoBehaviour
@@ -12,21 +10,21 @@ public class Enemy : MonoBehaviour
     [SerializeField] int _enemyScoreB = 500;
     [SerializeField] int _enemyScoreC = 1000;
     [Tooltip("EnemyのDestroyされるまでの時間(s)")]
-    [SerializeField] float _waitDestroy = 1;
+    [SerializeField] float _waitDestroy = 3;
     [Tooltip("エネミーの吹っ飛ぶ速度")]
-    [SerializeField] float _impactedSpeed = 3;
+    [SerializeField] float _impactedSpeed = 310;
     [Tooltip("エネミーの落下速度")]
-    [SerializeField] float _gravity = 0.2f;
+    [SerializeField] float _gravity = 1;
     [Tooltip("エネミーの1回転にかかる時間(s)")]
     [SerializeField] float _rotateTime = 0.2f;
     [Tooltip("エネミーの吹っ飛び方(Vector2)")]
-    [SerializeField] Vector2[] _vec2 = new[] { new Vector2(1, 0), new Vector2(1, 1), new Vector2(1, -1)};
+    [SerializeField] Vector2[] _vec2 = new[] { new Vector2(1, 0.4f), new Vector2(1, 2), new Vector2(2, -1)};
     /// <summary>
     /// エネミーにつけるAnimatorのパラメーターにはbool値"Defeat"をfalseで追加してください
     /// </summary>
+    Animator _anim;
     Transform _tra;
     Rigidbody2D _rb;
-    Animator _anim;
     private void Start()
     {
         _anim = GetComponent<Animator>();
@@ -73,13 +71,16 @@ public class Enemy : MonoBehaviour
     private IEnumerator IDefeated()
     {
         int score = GetScore();
-        //ここからanimatorの処理を描く
+        //ここからanimationの処理を描く
+        CRIAudioManager.Instance.CriSePlay(7 + GetState());
         _anim.SetBool("Defeat", true);
-        _tra.DORotate(new Vector3(0, 0, 360), _rotateTime, RotateMode.FastBeyond360).SetEase(Ease.Linear).SetLoops(-1);
         _rb.velocity = (_vec2[GetState()].normalized * _impactedSpeed);
         _rb.gravityScale = _gravity;
+        var rotateDOTween = _tra.DORotate(new Vector3(0, 0, 360), _rotateTime, RotateMode.FastBeyond360);
+        rotateDOTween.SetLoops(-1).SetEase(Ease.Linear).Play();
         GameManager.Instance.ScoreValue(score);
         yield return new WaitForSeconds(_waitDestroy);
-        Destroy(this);
+        rotateDOTween.Kill();
+        Destroy(this.gameObject);
     }
 }
