@@ -31,7 +31,6 @@ public class PlayerController : MonoBehaviour
     private float _minSpeed = 0.5f;
 
     [Tooltip("現在のスピード")]
-    [SerializeField]
     private float _speed;
 
     [Header("最高スピード")]
@@ -170,6 +169,7 @@ public class PlayerController : MonoBehaviour
                 if(_wind.active == false)
                 {
                     _wind.SetActive(true);
+                    CRIAudioManager.Instance.CriSePlay(5);
                 }
                 if(_locus.active == false)
                 {
@@ -183,6 +183,7 @@ public class PlayerController : MonoBehaviour
                 if (_locus.active == false)
                 {
                     _locus.SetActive(true);
+                    CRIAudioManager.Instance.CriSePlay(5);
                 }
                 if(_wind.active == true)
                 {
@@ -251,7 +252,7 @@ public class PlayerController : MonoBehaviour
         if (_speedText)
         {
             var total = (Mathf.Abs(_rb.velocity.x) + Mathf.Abs(_rb.velocity.y)) * 8;
-            _speedText.text = $"Speed: {total.ToString("0.00")} km";
+            _speedText.text = $"Speed: {total.ToString("000.00")} km";
         }
 
         _animator.SetFloat("Speed",_speed);

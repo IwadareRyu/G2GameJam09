@@ -1,3 +1,0 @@
-memo
-Enemyのanimationの内容は必ず以下の内容を加える
-・colliderの無効化
