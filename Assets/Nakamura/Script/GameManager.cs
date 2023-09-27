@@ -53,10 +53,10 @@ public class GameManager : AbstractSingleton<GameManager>
             case GameState.Start:
                 if (_light == null)
                 {//Lightを持っていない場合に取ってくる
-                    _light = GetComponentInChildren<Light2D>();
+                   //_light = GetComponentInChildren<Light2D>();
                 }
-                _timeText.enabled = true;
-                _scoreText.enabled = true;
+                //_timeText.enabled = true;
+                //_scoreText.enabled = true;
                 _holdCT = _lightCT;
                 //Audiの再生
                 CRIAudioManager.Instance.CriBgmPlay(0);
@@ -65,17 +65,17 @@ public class GameManager : AbstractSingleton<GameManager>
                 //タイマーの初期化
                 _timeValue = _time;
                 //Textの初期化
-                _timeText.text = _time.ToString("000");
-                _scoreText.text = _score.ToString("00000");
+                //_timeText.text = _time.ToString("000");
+                //_scoreText.text = _score.ToString("00000");
                 break;
 
             case GameState.Result:
                 if (_light == null)
                 {//Lightを持っていない場合に取ってくる
-                    _light = GetComponentInChildren<Light2D>();
+                  //  _light = GetComponentInChildren<Light2D>();
                 }
                 //ライトの明るさを戻す
-                _light.intensity = 1;
+                //_light.intensity = 1;
                 _resultScoreText.text = _score.ToString("00000");
                 //Audiの再生
                 CRIAudioManager.Instance.CriBgmPlay(1);
@@ -94,6 +94,10 @@ public class GameManager : AbstractSingleton<GameManager>
                 {//スペースキーが押されたらゲームスタート
                     is_Game = true;
                     NowGameState = GameState.InGame;
+                    _timeText.enabled = true;
+                    _scoreText.enabled = true;
+                    _timeText.text = _time.ToString("000");
+                    _scoreText.text = _score.ToString("00000");
                 }
                 break;
 
