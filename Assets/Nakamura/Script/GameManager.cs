@@ -113,7 +113,7 @@ public class GameManager : AbstractSingleton<GameManager>
                         if (_lightCT <= 0)   
                         {
                             _lightCT = _holdCT;
-                            _light.intensity -= _douwLight; 
+                            if (_light != null) { _light.intensity -= _douwLight; }
                         }
                     }
                 }
