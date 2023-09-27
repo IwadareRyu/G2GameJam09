@@ -576,6 +576,18 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 536848866, guid: 9cb5edbd8e16859498951fa5b275a830, type: 3}
+      propertyPath: m_UiScaleMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1474405023056079835, guid: 9cb5edbd8e16859498951fa5b275a830, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 100.00003
+      objectReference: {fileID: 0}
+    - target: {fileID: 1788552580123503641, guid: 9cb5edbd8e16859498951fa5b275a830, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 86
+      objectReference: {fileID: 0}
     - target: {fileID: 7417726129691827058, guid: 9cb5edbd8e16859498951fa5b275a830, type: 3}
       propertyPath: m_Name
       value: GameManager
