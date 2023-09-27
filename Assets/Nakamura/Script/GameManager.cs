@@ -119,6 +119,8 @@ public class GameManager : AbstractSingleton<GameManager>
             NowGameState = GameState.Result;
             is_Game = false;
             is_Clear = false;
+            _scoreText.text = null;
+            _timeText.text = null;
         }
 
         SceneManager.LoadScene(scene);
