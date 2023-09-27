@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using Hikanyan.Core;
-using Unity.VisualScripting;
+using UnityEngine.Rendering.Universal;
 
 public enum GameState
 {
@@ -19,7 +19,9 @@ public class GameManager : AbstractSingleton<GameManager>
     [Tooltip("現在のゲームステート")]
     [SerializeField] private GameState NowGameState = GameState.None;
     [Tooltip("InGameから遷移するシーンの名前を設定")]
-    [SerializeField] private string _sceneName = null;
+    [SerializeField] private string _InGameTOresult = "Result";
+    [Tooltip("Resultから遷移するシーンの名前を設定")]
+    [SerializeField] private string _resultTOinGame = "InGame";
     [Tooltip("ゲーム内のスコア")]
     [SerializeField] private int _score = 0;
     [Tooltip("ゲーム開始判定（ゲーム中の時はTrue）")]
@@ -36,12 +38,26 @@ public class GameManager : AbstractSingleton<GameManager>
     [SerializeField] private Text _scoreText;
     [Tooltip("リザルト時にスコアをいれるText")]
     [SerializeField] private Text _resultScoreText;
+    [Tooltip("Light")]
+    private Light2D _light = null;
+    [Tooltip("暗くする速度を調整するカウント変数")]
+    [SerializeField] private float _lightCT = 3f;
+    [Tooltip("暗くする速度")]
+    [SerializeField] private float _douwLight = 0.01f;
+    private float _holdCT = 0;
 
     public void LoadProssesing()
     {
         switch (NowGameState)
         {
             case GameState.Start:
+                if (_light == null)
+                {//Lightを持っていない場合に取ってくる
+                    _light = GetComponentInChildren<Light2D>();
+                }
+                _timeText.enabled = true;
+                _scoreText.enabled = true;
+                _holdCT = _lightCT;
                 //スコア初期化処理
                 _score = 0;
                 //タイマーの初期化
@@ -52,11 +68,15 @@ public class GameManager : AbstractSingleton<GameManager>
                 break;
 
             case GameState.Result:
-                //Debug.Log(NowGameState);
+                if (_light == null)
+                {//Lightを持っていない場合に取ってくる
+                    _light = GetComponentInChildren<Light2D>();
+                }
+                //ライトの明るさを戻す
+                _light.intensity = 1;
                 _resultScoreText.text = _score.ToString("00000");
                 is_Game = false;
                 is_Clear = false;
-                //Debug.Log("result");
                 break;
         }
     }
@@ -82,10 +102,21 @@ public class GameManager : AbstractSingleton<GameManager>
                 {//ゲームが開始された時の処理
                     if (_timeText != null)
                     {
+                        _lightCT -= Time.deltaTime;
                         _timeValue -= Time.deltaTime;
                         _timeText.text = _timeValue.ToString("000");
+
+                        if (_lightCT <= 0)   
+                        {
+                            _lightCT = _holdCT;
+                            _light.intensity -= _douwLight; 
+                        }
                     }
                 }
+                break;
+
+            case GameState.Result:
+                if (Input.GetKeyDown(KeyCode.Return)) { SceneChange(_resultTOinGame); }
                 break;
         }
     }
@@ -102,9 +133,7 @@ public class GameManager : AbstractSingleton<GameManager>
         is_Clear = true;
         is_Game = false;
         _score += (int)_timeValue * 10;
-
-        if (_sceneName != null) { SceneChange(_sceneName); }
-        else { SceneChange("Result"); }
+        SceneChange(_InGameTOresult);
     }
 
     public void SceneChange(string scene)
@@ -119,8 +148,8 @@ public class GameManager : AbstractSingleton<GameManager>
             NowGameState = GameState.Result;
             is_Game = false;
             is_Clear = false;
-            _scoreText.text = null;
-            _timeText.text = null;
+            _scoreText.enabled = false;
+            _timeText.enabled = false;
         }
 
         SceneManager.LoadScene(scene);
