@@ -1,0 +1,4 @@
+アニメーションについて
+・アニメイターに（bool）Defeatを追加してtransitionを作る
+・EnemyStandの中身は自由
+・EnemyDefeatの中でcolliderのenableをオフにする
