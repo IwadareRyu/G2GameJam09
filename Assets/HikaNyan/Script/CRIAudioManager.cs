@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using CriWare;
-using UniRx;
 using Cysharp.Threading.Tasks;
 using Hikanyan.Core;
 
@@ -45,9 +44,20 @@ public class CRIAudioManager : AbstractSingleton<CRIAudioManager>
     }
 
 
+    private int _indexStay = 0;
+
+
+
     public void CriBgmPlay(int index)
     {
+        if (_criAtomSourceBgm.status == CriAtomSource.Status.Playing)
+        {
+            _criAtomSourceBgm.Stop();
+        }
+
+        _criAtomSourceBgm.loop = true;
         _criAtomExPlaybackBGM = _criAtomSourceBgm.Play(index);
+        _indexStay = index;
     }
 
     public void CriBgmStop()
