@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEditor.Callbacks;
+using UnityEditor.Tilemaps;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,6 +10,9 @@ using UnityEngine.UI;
 public class PlayerController : MonoBehaviour
 {
     Rigidbody2D _rb;
+    CircleCollider2D _circleColider;
+
+    int _rotaCount;
 
     [Header("最低スピード")]
     [SerializeField]
@@ -22,7 +26,10 @@ public class PlayerController : MonoBehaviour
     private float _maxSpeed = 5f;
     [Header("中間のスピード")]
     [SerializeField]
-    private float _midSpeed = 2.5f;
+    private float _midSpeed = 2.5f
+        ;
+    [SerializeField]
+    private float _jumpPower = 3f;
     [Header("スピードに応じたプラスする重力の割合")]
     [SerializeField]
     private float _plusGravity = 0.3f;
@@ -30,9 +37,13 @@ public class PlayerController : MonoBehaviour
     [Tooltip("攻撃のクールタイム")]
     private float _attackTime;
 
-    private bool _attackbool;
+    private bool _attackBool;
 
-    private bool _jump;
+    private bool _jumpBool;
+
+    private bool _actionBool;
+
+    private bool _invisibleBool;
 
     RaycastHit2D _groundHit;
     [SerializeField]
@@ -44,7 +55,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("ジャンプ時、向きを元に戻すので、Playerのスプライトをアタッチ")]
     [SerializeField]
-    Transform _sproteAngle;
+    Transform _spriteAngle;
 
     [Header("敵に当たった時減らすスコア")]
     [SerializeField]
@@ -60,12 +71,13 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         _rb = GetComponent<Rigidbody2D>();
-
+        _circleColider = GetComponent<CircleCollider2D>();
+        _speed = _minSpeed;
     }
 
     private void OnDrawGizmos()
     {
-        Debug.DrawRay(transform.position, new Vector2(0, -3), Color.red);
+        Debug.DrawRay(transform.position, new Vector2(0, -2), Color.red);
         Debug.DrawRay(new Vector3(transform.position.x + 1,transform.position.y - 0.8f,transform.position.z),new Vector2(0,1),Color.red);
         Debug.DrawRay(new Vector3(transform.position.x + 0.5f, transform.position.y - 0.3f, transform.position.z), new Vector2(1,0), Color.red);
     }
@@ -73,13 +85,13 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //if (GameManager.Instance.is_Game)
-        //{
-            _groundHit = Physics2D.Raycast(transform.position, Vector2.down, 3.0f, _groundLayer);
+        if (GameManager.Instance.is_Game)
+        {
+            _groundHit = Physics2D.Raycast(transform.position, Vector2.down, 2.0f, _groundLayer);
             //_upGroundHit = Physics2D.Raycast(transform.position, Vector2.down, 3.0f, _upGroundLayer);
 
             float h = Input.GetAxis("Horizontal");
-            if (_attackbool)
+            if (_attackBool)
             {
                 _attackTime += Time.deltaTime;
             }
@@ -102,18 +114,19 @@ public class PlayerController : MonoBehaviour
 
             if (_attackTime > 0.3f)
             {
-                _attackbool = false;
+                _attackBool = false;
 
                 //ピロンみたいな音を出すかも？
 
                 _attackTime = 0;
             }
 
-            if (!_attackbool)
+            if (!_attackBool)
             {
                 if (Input.GetButtonDown("Fire1"))
                 {
                     AttackMotion(EnemyState.EnemyA);
+
                 }
                 else if (Input.GetButtonDown("Fire2"))
                 {
@@ -149,7 +162,7 @@ public class PlayerController : MonoBehaviour
                     GameManager.Instance.ScoreValue(score);
                 }
             }
-        //}
+        }
     }
 
     private void FixedUpdate()
@@ -169,6 +182,28 @@ public class PlayerController : MonoBehaviour
 
 
         _rb.velocity = new Vector2(_speed, _rb.velocity.y + n);
+
+        if (Input.GetButton("Jump") && _jumpBool)
+        {
+            _actionBool = true;
+            _rb.velocity = new Vector2(_speed,_jumpPower);
+            CRIAudioManager.Instance.CriSePlay(2);
+            _jumpBool = false;
+        }
+
+        if (Input.GetButtonUp("Jump") && _actionBool)
+        {
+            n = 0;
+
+            _spriteAngle.Rotate(0, 0, 45);
+            _rotaCount++;
+
+            if (_rotaCount == 8)
+            {
+                _rotaCount = 0;
+                GameManager.Instance.ScoreValue(1000);
+            }
+        }
 
         if (_speedText)
         {
@@ -209,15 +244,41 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if(collision.gameObject.tag == "Enemy")
+        if(collision.gameObject.tag == "JumpGround")
         {
-            _speed = 0.5f;
+            _jumpBool = true;
+            _actionBool = false;
+        }
+
+        if(collision.gameObject.tag == "Ground")
+        {
+            _jumpBool = false;
+            if (_actionBool)
+            {
+                _actionBool = false;
+                _rotaCount = 0;
+            }
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.gameObject.tag == "Enemy" && !_invisibleBool)
+        {
+            _speed = _minSpeed;
             CRIAudioManager.Instance.CriSePlay(0);
             if (GameManager.Instance)
             {
                 GameManager.Instance.ScoreValue(_lowScore);
             }
-
+            StartCoroutine(EnemyDamageCoroutine());
         }
+    }
+
+    IEnumerator EnemyDamageCoroutine()
+    {
+        _invisibleBool = true;
+        yield return new WaitForSeconds(2f);
+        _invisibleBool = false;
     }
 }
