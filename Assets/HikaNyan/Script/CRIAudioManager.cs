@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using CriWare;
-using UniRx;
 using Cysharp.Threading.Tasks;
 using Hikanyan.Core;
 
