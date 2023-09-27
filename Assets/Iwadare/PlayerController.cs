@@ -18,10 +18,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     GameObject _locus;
 
-
-    [SerializeField]
-    Sprite _playerSprite;
-
     Animator _animator;
 
     int _rotaCount;
@@ -46,6 +42,7 @@ public class PlayerController : MonoBehaviour
     private float _plusGravity = 0.3f;
 
     [Tooltip("攻撃のクールタイム")]
+    [SerializeField]
     private float _attackTime;
 
     private bool _attackBool;
@@ -76,14 +73,17 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     Text _speedText;
 
+    [SerializeField]
     float _speedTimer;
+
+    bool _oneshot;
 
     // Start is called before the first frame update
     void Start()
     {
         _rb = GetComponent<Rigidbody2D>();
         _circleColider = GetComponent<CircleCollider2D>();
-        _speed = _minSpeed;
+        //_speed = 0;
         _animator = GetComponent<Animator>();
         _wind.SetActive(false);
         _locus.SetActive(false);
@@ -92,86 +92,86 @@ public class PlayerController : MonoBehaviour
     private void OnDrawGizmos()
     {
         Debug.DrawRay(transform.position, new Vector2(0, -2), Color.red);
-        Debug.DrawRay(new Vector3(transform.position.x + 1,transform.position.y - 0.8f,transform.position.z),new Vector2(0,1),Color.red);
-        Debug.DrawRay(new Vector3(transform.position.x + 0.5f, transform.position.y - 0.3f, transform.position.z), new Vector2(1,0), Color.red);
+        Debug.DrawRay(new Vector3(transform.position.x + 1, transform.position.y - 0.8f, transform.position.z), new Vector2(0, 1), Color.red);
+        Debug.DrawRay(new Vector3(transform.position.x + 0.5f, transform.position.y - 0.3f, transform.position.z), new Vector2(1, 0), Color.red);
     }
 
     // Update is called once per frame
     void Update()
     {
-        //if (GameManager.Instance.is_Game)
-        //{
-        _groundHit = Physics2D.Raycast(transform.position, Vector2.down, 2.0f, _groundLayer);
-        //_upGroundHit = Physics2D.Raycast(transform.position, Vector2.down, 3.0f, _upGroundLayer);
-
-        float h = Input.GetAxis("Horizontal");
-        if (_attackBool)
+        if (GameManager.Instance.is_Game)
         {
-            _attackTime += Time.deltaTime;
-        }
-        _speedTimer += Time.deltaTime;
-
-        if (h > 0)
-        {
-            if (_speed < _maxSpeed)
+            if(!_oneshot)
             {
-                PlayerSpeed(0.01f);
+                _oneshot = true;
+                _speed = _minSpeed;
             }
-        }
-        if (h < 0)
-        {
-            if (_speed > _minSpeed)
+            _groundHit = Physics2D.Raycast(transform.position, Vector2.down, 2.0f, _groundLayer);
+            //_upGroundHit = Physics2D.Raycast(transform.position, Vector2.down, 3.0f, _upGroundLayer);
+
+            float h = Input.GetAxis("Horizontal");
+            if (_attackBool)
             {
-                PlayerSpeed(-0.01f);
+                _attackTime += Time.deltaTime;
             }
-        }
+            _speedTimer += Time.deltaTime;
 
-        if (_attackTime > 0.3f)
-        {
-            _attackBool = false;
-
-            //ピロンみたいな音を出すかも？
-
-            _attackTime = 0;
-        }
-
-        if (!_attackBool)
-        {
-            if (Input.GetButtonDown("Fire1"))
+            if (h > 0)
             {
-                AttackMotion(EnemyState.EnemyA);
-                CRIAudioManager.Instance.CriSePlay(3);
-                _animator.Play("Attack1");
+                if (_speed < _maxSpeed)
+                {
+                    PlayerSpeed(0.01f);
+                }
             }
-            else if (Input.GetButtonDown("Fire2"))
+            if (h < 0)
             {
-                AttackMotion(EnemyState.EnemyB);
-                CRIAudioManager.Instance.CriSePlay(3);
-                _animator.Play("Attack2");
+                if (_speed > _minSpeed)
+                {
+                    PlayerSpeed(-0.01f);
+                }
             }
-            else if (Input.GetButtonDown("Fire3"))
+
+            if (_attackTime > 0.3f)
             {
-                AttackMotion(EnemyState.EnemyC);
-                CRIAudioManager.Instance.CriSePlay(3);
-                _animator.Play("Attack3");
+                _attackBool = false;
+
+                //ピロンみたいな音を出すかも？
+
+                _attackTime = 0;
             }
-        }
 
-
-
-        if (_speedTimer > 1f)
-        {
+            if (!_attackBool && !_invisibleBool)
+            {
+                if (Input.GetButtonDown("Fire1"))
+                {
+                    AttackMotion(EnemyState.EnemyA);
+                    CRIAudioManager.Instance.CriSePlay(3);
+                    _animator.Play("Attack1");
+                }
+                else if (Input.GetButtonDown("Fire2"))
+                {
+                    AttackMotion(EnemyState.EnemyB);
+                    CRIAudioManager.Instance.CriSePlay(3);
+                    _animator.Play("Attack2");
+                }
+                else if (Input.GetButtonDown("Fire3"))
+                {
+                    AttackMotion(EnemyState.EnemyC);
+                    CRIAudioManager.Instance.CriSePlay(3);
+                    _animator.Play("Attack3");
+                }
+            }
             int score = 0;
             if (_speed >= _maxSpeed - 0.1f)
             {
                 score = 300;
                 //強風
-                if(_wind.active == false)
+                if (_wind.active == false)
                 {
                     _wind.SetActive(true);
                     CRIAudioManager.Instance.CriSePlay(5);
                 }
-                if(_locus.active == false)
+                if (_locus.active == false)
                 {
                     _locus.SetActive(true);
                 }
@@ -185,29 +185,29 @@ public class PlayerController : MonoBehaviour
                     _locus.SetActive(true);
                     CRIAudioManager.Instance.CriSePlay(5);
                 }
-                if(_wind.active == true)
+                if (_wind.active == true)
                 {
                     _wind.SetActive(false);
                 }
             }
             else
             {
-                if(_locus.active == true)
+                if (_locus.active == true)
                 {
                     _locus.SetActive(false);
                 }
-                if(_wind.active == true)
+                if (_wind.active == true)
                 {
                     _wind.SetActive(false);
                 }
             }
-            if (GameManager.Instance)
+            if (GameManager.Instance && _speedTimer > 1f)
             {
                 GameManager.Instance.ScoreValue(score);
+                _speedTimer = 0;
             }
         }
-        //}
-    }
+    }   
 
     private void FixedUpdate()
     {
@@ -252,7 +252,7 @@ public class PlayerController : MonoBehaviour
         if (_speedText)
         {
             var total = (Mathf.Abs(_rb.velocity.x) + Mathf.Abs(_rb.velocity.y)) * 8;
-            _speedText.text = $"Speed: {total.ToString("000.00")} km";
+            _speedText.text = total.ToString("000.00");
         }
 
         _animator.SetFloat("Speed",_speed);
@@ -265,8 +265,6 @@ public class PlayerController : MonoBehaviour
 
     void AttackMotion(EnemyState state)
     {
-
-        //stateに合わせたアタックモーション
 
         Collider2D[] cols;
         cols = Physics2D.OverlapCircleAll(new Vector2(transform.position.x + 1,transform.position.y - 0.3f),1.0f);
@@ -288,30 +286,29 @@ public class PlayerController : MonoBehaviour
         _attackTime = 0f;
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if(collision.gameObject.tag == "JumpGround")
-        {
-            _jumpBool = true;
-            _actionBool = false;
-        }
+    //private void OnCollisionEnter2D(Collision2D collision)
+    //{
+    //    if (collision.gameObject.tag == "JumpGround")
+    //    {
+    //        _jumpBool = true;
+    //        _actionBool = false;
+    //    }
 
-        if(collision.gameObject.tag == "Ground")
-        {
-            _jumpBool = false;
-            if (_actionBool)
-            {
-                _actionBool = false;
-                _rotaCount = 0;
-            }
-        }
-    }
+    //    if (collision.gameObject.tag == "Ground")
+    //    {
+    //        _jumpBool = false;
+    //        if (_actionBool)
+    //        {
+    //            _actionBool = false;
+    //            _rotaCount = 0;
+    //        }
+    //    }
+    //}
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if(collision.gameObject.tag == "Enemy" && !_invisibleBool)
         {
-            _speed = _minSpeed;
             CRIAudioManager.Instance.CriSePlay(0);
             if (GameManager.Instance)
             {
@@ -321,9 +318,10 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    IEnumerator EnemyDamageCoroutine()
+    public IEnumerator EnemyDamageCoroutine()
     {
         _invisibleBool = true;
+        _animator.Play("Invisible");
         yield return new WaitForSeconds(2f);
         _invisibleBool = false;
     }

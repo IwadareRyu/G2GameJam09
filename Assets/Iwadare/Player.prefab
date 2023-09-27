@@ -259,19 +259,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _wind: {fileID: 6907818332059430115}
   _locus: {fileID: 4888812189412919383}
-  _playerSprite: {fileID: 0}
   _minSpeed: 0.5
-  _speed: 0
   _maxSpeed: 5
   _midSpeed: 2.5
   _jumpPower: 3
   _plusGravity: 0.3
+  _attackTime: 0
   _groundLayer:
     serializedVersion: 2
     m_Bits: 136
   _spriteAngle: {fileID: 5368975016492408899}
   _lowScore: -2000
   _speedText: {fileID: 0}
+  _speedTimer: 3
 --- !u!114 &8686228303227924012
 MonoBehaviour:
   m_ObjectHideFlags: 0
