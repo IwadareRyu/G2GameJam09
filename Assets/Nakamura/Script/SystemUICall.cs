@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SystemUI : MonoBehaviour
+public class SystemUICall : MonoBehaviour
 {
     [Tooltip("Score、Timeを表示するテキストの背景UI")]
     [SerializeField] private GameObject _systemUI = null;
