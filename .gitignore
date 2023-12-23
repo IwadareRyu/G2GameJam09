@@ -74,3 +74,6 @@ crashlytics-build.properties
 .idea
 Assets/CRIMW
 Assets/Plugins/
+Output/
+Assets/Resources/
+Assets/Image/
